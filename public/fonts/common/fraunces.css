@@ -1,0 +1,4 @@
+/* PLACEHOLDER — self-host Fraunces for production/offline.
+   Get it: https://fonts.google.com/specimen/Fraunces
+   Until then, this loads Fraunces from Google Fonts so headings render correctly. */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
