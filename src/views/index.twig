@@ -1,20 +1,103 @@
 {% extends "layout.twig" %}
 
-{% block content %}
+{% block body %}
+<div class="row g-4">
+  <!-- ── Left / main column: rooms ─────────────────────────── -->
+  <div class="col-12 col-xl-8">
 
-        <main>
-            <h1 class="visually-hidden">Heroes examples</h1>
-            <div class="px-4 py-5 my-5 text-center">
-                <h1 class="display-5 fw-bold">Centered hero</h1>
-                <div class="col-lg-6 mx-auto">
-                    <p class="lead mb-4">Quickly design and customize responsive mobile-first sites with Bootstrap, the world�s most popular front-end open source toolkit, featuring Sass variables and mixins, responsive grid system, extensive prebuilt components, and powerful JavaScript plugins.</p>
-                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                        <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Primary button</button>
-                        <button type="button" class="btn btn-outline-secondary btn-lg px-4">Secondary</button>
-                    </div>
+    <!-- Simulate toolbar -->
+    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+      <span class="eyebrow me-1">Simulate</span>
+      <button class="sim-btn" data-sim="garage-open">
+        <i class="bi bi-door-open"></i> Open garage
+      </button>
+      <button class="sim-btn" data-sim="hot"
+              data-topic="{{ baseTopic }}/livingroom/ac/temperature" data-value="29">
+        <i class="bi bi-thermometer-sun"></i> Living room 29°C
+      </button>
+      <button class="sim-btn" data-sim="season" data-season="summer">
+        <i class="bi bi-sun"></i> Summer
+      </button>
+      <button class="sim-btn" data-sim="season" data-season="winter">
+        <i class="bi bi-snow"></i> Winter
+      </button>
+    </div>
+
+    <div class="row g-3">
+      {% for room in rooms %}
+      <div class="col-12 col-md-6">
+        <section class="panel h-100">
+          <div class="panel-head">
+            <h2><i class="bi bi-grid-1x2-fill room-icon"></i>{{ room.name }}</h2>
+            <span class="eyebrow">{{ room.id }}</span>
+          </div>
+          <div class="panel-body">
+            {% for device in room.devices %}
+              {% for v in device.variables %}
+              <div class="var-row" data-topic="{{ v.topic }}"
+                   data-updated-at="{{ v.updatedAt }}">
+                <div class="var-label">
+                  <span class="live-dot"></span>
+                  <span>
+                    <div class="var-name">{{ v.name }}</div>
+                    <div class="var-device">{{ device.name }}</div>
+                  </span>
                 </div>
-            </div>
-        </main>
+                <div class="var-value-wrap">
+                  <span class="var-value">{{ v.value }}</span><span class="var-unit">{{ v.unit }}</span>
+                  <div class="var-time">{{ v.updatedAt ? '' : 'no data' }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 
+  <!-- ── Right column: system + activity ───────────────────── -->
+  <div class="col-12 col-xl-4">
 
+    <!-- System panel -->
+    <section class="panel mb-4">
+      <div class="panel-head">
+        <h2><i class="bi bi-cpu room-icon"></i>System</h2>
+        <span class="eyebrow">home/system</span>
+      </div>
+      <div class="sys-grid">
+        <div class="sys-tile" data-key="season">
+          <div class="k">Season</div>
+          <div class="v season-{{ season }}">{{ season }}</div>
+        </div>
+        <div class="sys-tile">
+          <div class="k">MQTT</div>
+          <div class="v" style="color: var(--{{ mqttConnected ? 'live' : 'alert' }})">
+            {{ mqttConnected ? 'online' : 'offline' }}
+          </div>
+        </div>
+        <div class="sys-tile" data-topic="{{ baseTopic }}/system/yt_new_content">
+          <div class="k">New content</div>
+          <div class="v">—</div>
+        </div>
+        <div class="sys-tile">
+          <div class="k">Database</div>
+          <div class="v" style="color: var(--{{ dbHealthy ? 'live' : 'muted' }})">
+            {{ dbHealthy ? 'connected' : 'memory-only' }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Activity log -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2><i class="bi bi-activity room-icon"></i>Activity</h2>
+        <span class="eyebrow">live feed</span>
+      </div>
+      <div id="activity" class="activity"></div>
+    </section>
+  </div>
+</div>
 {% endblock %}

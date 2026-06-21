@@ -1,14 +1,27 @@
-<nav class="navbar navbar-dark bg-dark navbar-expand-lg">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">Empty Node Type Script</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-            </ul>
-
+<header class="app-header">
+  <div class="container-fluid px-3 px-lg-4">
+    <div class="d-flex align-items-center justify-content-between py-2 flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-3">
+        <div>
+          <div class="brand"><i class="bi bi-house-heart-fill me-1"></i>Smart<span class="dot">Home</span></div>
+          <div class="brand-sub">automation console</div>
         </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span id="pill-mqtt" class="pill {{ mqttConnected ? 'on' : 'off' }}">
+          <span class="ind"></span>
+          <span class="txt" data-label="MQTT">MQTT {{ mqttConnected ? 'online' : 'offline' }}</span>
+        </span>
+        <span id="pill-db" class="pill {{ dbHealthy ? 'on' : 'off' }}">
+          <span class="ind"></span>
+          <span class="txt" data-label="DB">DB {{ dbHealthy ? 'online' : 'offline' }}</span>
+        </span>
+        <span id="pill-season" class="pill on">
+          <i class="bi bi-thermometer-half"></i>
+          <span class="txt">{{ season }}</span>
+        </span>
+      </div>
     </div>
-</nav>
+  </div>
+</header>

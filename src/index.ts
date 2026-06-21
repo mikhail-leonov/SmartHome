@@ -1,67 +1,74 @@
-import 'dotenv/config';
-import express from 'express';
-import path from 'path';
-import fs from 'fs';
-import { networkInterfaces } from 'os';
+/**
+ * SmartHome — application entry point.
+ *
+ * Boots, in order: database → MQTT → seasonal scheduler → plugin discovery →
+ * trigger wiring → rules engine → web server + WebSocket hub. Every subsystem
+ * degrades gracefully: a missing broker or database is logged, not fatal, so
+ * the dashboard always comes up.
+ */
+import { createServer } from 'node:http';
 import pc from 'picocolors';
-import Twig from 'twig';
+import { config } from './config/index.js';
+import { logger } from './core/logger.js';
+import { initDb, closeDb } from './db/index.js';
+import { initMqtt, closeMqtt, publishSystem } from './mqtt/client.js';
+import { startSeasonScheduler, stopSeasonScheduler, currentSeason } from './engine/seasonal.js';
+import { loadPlugins } from './plugins/loader.js';
+import { wireSensors, stopEngine } from './engine/index.js';
+import { startRules, stopRules } from './automation/index.js';
+import { createApp } from './app.js';
+import { createWsHub } from './web/ws.js';
 
-const logger = console;
+async function main(): Promise<void> {
+  logger.banner('SmartHome automation platform starting…');
 
-const packageJsonPath = path.join(process.cwd(), 'package.json');
-let SERVER_VERSION = 'unknown';
-try {
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-    SERVER_VERSION = packageJson.version || 'unknown';
-} catch (err) {
-    logger.error(pc.red('Could not read package.json version'));
+  // 1. Persistence (non-fatal if unavailable).
+  await initDb();
+
+  // 2. MQTT — the source of truth.
+  initMqtt();
+
+  // 3. Seasonal scheduler + seed the current season variable.
+  startSeasonScheduler();
+  publishSystem('season', currentSeason());
+  publishSystem('online', true);
+
+  // 4. Auto-discover and register plugins (logged with picocolors).
+  const { sensors, actors } = await loadPlugins();
+
+  // 5. Wire each sensor's trigger to the engine.
+  wireSensors(sensors);
+
+  // 6. Start the rules engine with the discovered actors.
+  startRules(actors);
+
+  // 7. Web server + live dashboard.
+  const app = createApp();
+  const server = createServer(app);
+  createWsHub(server);
+
+  server.listen(config.port, () => {
+    logger.banner(`Dashboard ready → ${pc.underline(`http://localhost:${config.port}`)}`);
+    logger.info('boot', `topic convention: ${config.mqtt.baseTopic}/<room>/<device>/<variable>`);
+  });
+
+  // Graceful shutdown.
+  const shutdown = async (signal: string) => {
+    logger.warn('boot', `${signal} received — shutting down`);
+    stopRules();
+    stopEngine();
+    stopSeasonScheduler();
+    closeMqtt();
+    await closeDb();
+    server.close(() => process.exit(0));
+    // Hard exit if something hangs.
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
 }
 
-const app = express();
-const PORT = parseInt(process.env.PORT || '3000', 10);
-
-function getLocalIpAddress(): string {
-    const nets = networkInterfaces();
-    for (const name of Object.keys(nets)) {
-        for (const net of nets[name] || []) {
-            if (net.family === 'IPv4' && !net.internal) {
-                return net.address;
-            }
-        }
-    }
-    return 'localhost';
-}
-
-Twig.cache(false);
-app.set('views', path.join(process.cwd(), 'src/views'));
-app.set('view engine', 'twig');
-
-app.use('/public', express.static(path.join(__dirname, '..', 'public')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.get('/', (req, res) => {
-    res.render('index');
+main().catch((err) => {
+  logger.error('boot', err.stack ?? err.message);
+  process.exit(1);
 });
-
-const server = app.listen(PORT, '0.0.0.0', () => {
-    const localUrl = `http://localhost:${PORT}`;
-    const networkUrl = `http://${getLocalIpAddress()}:${PORT}`;
-    logger.error(pc.green(`FB2 Manager v${SERVER_VERSION} listening on:`));
-    logger.error(pc.green(` - Local:   ${localUrl}`));
-    logger.error(pc.green(` - Network: ${networkUrl}`));
-});
-
-async function shutdown() {
-    logger.error(pc.green('Shutting down gracefully...'));
-    await new Promise<void>((resolve) => {
-        server.close(() => {
-            logger.info(pc.green('HTTP server closed'));
-            resolve();
-        });
-    });
-    process.exit(0);
-}
-
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);

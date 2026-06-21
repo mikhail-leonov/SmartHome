@@ -1,0 +1,59 @@
+{
+  "rooms": [
+    {
+      "id": "livingroom",
+      "name": "Living Room",
+      "devices": [
+        {
+          "id": "ac",
+          "name": "Air Conditioner",
+          "variables": [
+            { "id": "temperature", "name": "Temperature", "unit": "°C" },
+            { "id": "target", "name": "Target", "unit": "°C" }
+          ]
+        },
+        {
+          "id": "lamp",
+          "name": "Floor Lamp",
+          "variables": [{ "id": "state", "name": "State", "unit": "" }]
+        }
+      ]
+    },
+    {
+      "id": "bedroom",
+      "name": "Bedroom",
+      "devices": [
+        {
+          "id": "ac",
+          "name": "Air Conditioner",
+          "variables": [
+            { "id": "temperature", "name": "Temperature", "unit": "°C" },
+            { "id": "target", "name": "Target", "unit": "°C" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "garage",
+      "name": "Garage",
+      "devices": [
+        {
+          "id": "door",
+          "name": "Door",
+          "variables": [{ "id": "state", "name": "State", "unit": "" }]
+        }
+      ]
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen",
+      "devices": [
+        {
+          "id": "vacuum",
+          "name": "Robot Vacuum",
+          "variables": [{ "id": "state", "name": "State", "unit": "" }]
+        }
+      ]
+    }
+  ]
+}

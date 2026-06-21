@@ -1,0 +1,248 @@
+/* ───────────────────────────────────────────────────────────────
+   SmartHome dashboard — a dark "operations console" layer on top of
+   Bootstrap 5. Telemetry reads as instrument panels: monospace numeric
+   readouts, a teal "live" heartbeat on fresh data, an amber accent for
+   commanded/active states, and muted styling for stale variables.
+   ─────────────────────────────────────────────────────────────── */
+
+:root {
+  --bg: #0e1116;
+  --surface: #161b22;
+  --surface-2: #1c232c;
+  --border: #232a33;
+  --text: #c9d1d9;
+  --muted: #6e7681;
+  --live: #2dd4bf;     /* teal — fresh / online       */
+  --active: #f5a623;   /* amber — commanded / active   */
+  --alert: #f06565;    /* red — stale / threshold      */
+  --radius: 14px;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45, 212, 191, 0.06), transparent 60%),
+    radial-gradient(900px 500px at 0% 0%, rgba(245, 166, 35, 0.05), transparent 55%),
+    var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.app-header {
+  border-bottom: 1px solid var(--border);
+  background: rgba(14, 17, 22, 0.85);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.brand {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-size: 1.15rem;
+}
+.brand .dot {
+  color: var(--live);
+}
+.brand-sub {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+}
+.pill .ind {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.pill.on .ind { background: var(--live); box-shadow: 0 0 8px var(--live); }
+.pill.off .ind { background: var(--alert); }
+.pill.on { color: var(--text); }
+
+/* ── Section labels ─────────────────────────────────────────── */
+.eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* ── Cards ──────────────────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.panel-head {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-head h2 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  margin: 0;
+}
+.panel-head .room-icon {
+  color: var(--live);
+  margin-right: 0.5rem;
+}
+.panel-body { padding: 0.4rem 0.5rem; }
+
+/* ── Variable rows ──────────────────────────────────────────── */
+.var-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+}
+.var-row + .var-row { border-top: 1px solid rgba(35, 42, 51, 0.6); }
+.var-label { display: flex; align-items: center; gap: 0.55rem; }
+.var-name { font-size: 0.9rem; }
+.var-device {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.var-value-wrap { text-align: right; }
+.var-value {
+  font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 1.18rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.var-unit { color: var(--muted); font-size: 0.85rem; margin-left: 0.15rem; }
+.var-time { font-size: 0.68rem; color: var(--muted); }
+
+/* heartbeat dot — flashes when a value updates live */
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+.var-row.fresh .live-dot {
+  background: var(--live);
+  border-color: var(--live);
+  animation: pulse 1.6s ease-out;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.55); }
+  100% { box-shadow: 0 0 0 12px rgba(45, 212, 191, 0); }
+}
+
+/* stale + active states */
+.var-row.stale .var-value { color: var(--muted); }
+.var-row.stale .live-dot { background: transparent; }
+.var-row.stale .var-time { color: var(--alert); }
+.var-value.active { color: var(--active); }
+.var-value.alert { color: var(--alert); }
+
+/* ── System panel ───────────────────────────────────────────── */
+.sys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.6rem; }
+.sys-tile {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+}
+.sys-tile .k { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.sys-tile .v { font-size: 1.05rem; font-weight: 700; margin-top: 0.2rem; }
+.season-summer { color: var(--active); }
+.season-winter { color: #6ec8ff; }
+.season-spring { color: var(--live); }
+.season-autumn { color: #e3915b; }
+
+/* ── Activity log ───────────────────────────────────────────── */
+.activity {
+  max-height: 540px;
+  overflow-y: auto;
+  font-size: 0.82rem;
+}
+.activity::-webkit-scrollbar { width: 8px; }
+.activity::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+.log-item {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid rgba(35, 42, 51, 0.5);
+  animation: slidein 0.3s ease;
+}
+@keyframes slidein { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+.log-item .when {
+  color: var(--muted);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.72rem;
+  flex: 0 0 56px;
+}
+.log-item .badge-kind {
+  flex: 0 0 auto;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  height: fit-content;
+  border: 1px solid var(--border);
+}
+.k-state { color: var(--live); }
+.k-actor { color: var(--active); }
+.k-sensor { color: #9d8cff; }
+.k-season { color: #e3915b; }
+.k-system { color: var(--muted); }
+.log-item .msg { color: var(--text); word-break: break-word; }
+.log-item .msg .detail { color: var(--muted); font-size: 0.74rem; }
+
+/* ── Controls ───────────────────────────────────────────────── */
+.sim-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 9px;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+.sim-btn:hover { border-color: var(--live); color: var(--live); }
+
+footer.app-footer {
+  color: var(--muted);
+  font-size: 0.76rem;
+  border-top: 1px solid var(--border);
+}
+code.topic {
+  color: var(--live);
+  background: var(--surface-2);
+  padding: 0.1rem 0.35rem;
+  border-radius: 5px;
+  font-size: 0.78rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .var-row.fresh .live-dot { animation: none; }
+  .log-item { animation: none; }
+}
