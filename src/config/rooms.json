@@ -9,7 +9,8 @@
           "name": "Air Conditioner",
           "variables": [
             { "id": "temperature", "name": "Temperature", "unit": "°C" },
-            { "id": "target", "name": "Target", "unit": "°C" }
+            { "id": "target", "name": "Target", "unit": "°C" },
+            { "id": "mode", "name": "Mode", "unit": "" }
           ]
         },
         {
@@ -28,7 +29,8 @@
           "name": "Air Conditioner",
           "variables": [
             { "id": "temperature", "name": "Temperature", "unit": "°C" },
-            { "id": "target", "name": "Target", "unit": "°C" }
+            { "id": "target", "name": "Target", "unit": "°C" },
+            { "id": "mode", "name": "Mode", "unit": "" }
           ]
         }
       ]
@@ -39,8 +41,13 @@
       "devices": [
         {
           "id": "door",
-          "name": "Door",
-          "variables": [{ "id": "state", "name": "State", "unit": "" }]
+          "name": "Door (ratgdo)",
+          "variables": [
+            { "id": "state", "name": "State", "unit": "" },
+            { "id": "obstruction", "name": "Obstruction", "unit": "" },
+            { "id": "light", "name": "Light", "unit": "" },
+            { "id": "lock", "name": "Lock", "unit": "" }
+          ]
         }
       ]
     },
@@ -50,8 +57,38 @@
       "devices": [
         {
           "id": "vacuum",
-          "name": "Robot Vacuum",
-          "variables": [{ "id": "state", "name": "State", "unit": "" }]
+          "name": "Robot Vacuum (Roomba)",
+          "variables": [
+            { "id": "state", "name": "State", "unit": "" },
+            { "id": "battery", "name": "Battery", "unit": "%" },
+            { "id": "phase", "name": "Phase", "unit": "" },
+            { "id": "bin", "name": "Bin", "unit": "" },
+            { "id": "error", "name": "Error", "unit": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "weather",
+      "name": "Weather · Coral Springs",
+      "devices": [
+        {
+          "id": "current",
+          "name": "Open-Meteo",
+          "variables": [
+            { "id": "temperature", "name": "Temperature", "unit": "°F" },
+            { "id": "apparent", "name": "Feels Like", "unit": "°F" },
+            { "id": "condition", "name": "Condition", "unit": "" },
+            { "id": "humidity", "name": "Humidity", "unit": "%" },
+            { "id": "wind", "name": "Wind", "unit": "mph" },
+            { "id": "gust", "name": "Gust", "unit": "mph" },
+            { "id": "precip_prob", "name": "Rain Chance", "unit": "%" },
+            { "id": "cloud", "name": "Cloud Cover", "unit": "%" },
+            { "id": "pressure", "name": "Pressure", "unit": "hPa" },
+            { "id": "uv", "name": "UV Index", "unit": "" },
+            { "id": "high", "name": "High", "unit": "°F" },
+            { "id": "low", "name": "Low", "unit": "°F" }
+          ]
         }
       ]
     }

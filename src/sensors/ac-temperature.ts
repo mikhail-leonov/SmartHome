@@ -6,6 +6,9 @@
  *
  * This stub simulates a reading with a small random walk seeded from the last
  * cached value. Replace the body of read() with a real device/API call.
+ *
+ * When the thermostat bridge is enabled, this skips that room so the simulated
+ * reading doesn't fight the real thermostat feed on the same topic.
  */
 import type { SensorPlugin } from '../types/types.js';
 
@@ -22,10 +25,13 @@ const plugin: SensorPlugin = {
 
   async run(ctx) {
     const base = ctx.config.mqtt.baseTopic;
-    const acRooms = ctx.config.rooms.filter((r) => r.devices.some((d) => d.id === 'ac'));
+    const th = ctx.config.thermostat;
+    const acRooms = ctx.config.rooms
+      .filter((r) => r.devices.some((d) => d.id === 'ac'))
+      .filter((r) => !(th.enabled && r.id === th.room)); // real thermostat owns its room
 
     if (acRooms.length === 0) {
-      ctx.logger.warn('no rooms with an AC device configured');
+      ctx.logger.warn('no simulated AC rooms (all configured or bridged)');
       return;
     }
 

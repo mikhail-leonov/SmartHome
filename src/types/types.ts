@@ -43,7 +43,7 @@ export type Trigger =
 
 /** Everything a plugin gets handed when it runs. */
 export interface PluginContext {
-  mqtt: { publish(topic: string, value: unknown): void };
+  mqtt: { publish(topic: string, value: unknown, opts?: { retain?: boolean }): void };
   state: {
     get(topic: string): StateValue | undefined;
     all(): StateSnapshot;
@@ -157,6 +157,65 @@ export interface AppConfig {
   ytdlp: {
     feedUrl?: string;
     downloadDir: string;
+  };
+  /**
+   * ratgdo bridge settings for the garage opener. The bridge subscribes to
+   * `<ratgdoPrefix>/<doorName>/status/#` and mirrors state onto
+   * `<baseTopic>/<room>/<device>/*`; commands go to
+   * `<ratgdoPrefix>/<doorName>/command/*`.
+   */
+  garage: {
+    enabled: boolean;
+    ratgdoPrefix: string;
+    doorName: string;
+    room: string;
+    device: string;
+  };
+  /**
+   * Roomba (dorita980) local bridge. Credentials obtained via
+   * `npx get-roomba-password <ip>`. The bridge mirrors robot telemetry onto
+   * `<baseTopic>/<room>/<device>/*`.
+   */
+  roomba: {
+    enabled: boolean;
+    blid?: string;
+    password?: string;
+    host?: string;
+    firmware: number;
+    emitIntervalMs: number;
+    room: string;
+    device: string;
+  };
+  /**
+   * Generic thermostat MQTT bridge. The Amazon Smart Thermostat has no local
+   * API, so this consumes/produces topics under `prefix` that an external
+   * Alexa→MQTT bridge provides, mirroring them onto `<baseTopic>/<room>/ac/*`.
+   * `unit` is the unit the external thermostat speaks ('F' for Amazon).
+   */
+  thermostat: {
+    enabled: boolean;
+    room: string;
+    prefix: string;
+    unit: 'F' | 'C';
+  };
+  /**
+   * Open-Meteo weather (free, no API key). Polled on an interval and mirrored
+   * onto `<baseTopic>/<room>/<device>/*`. Units follow Open-Meteo's options.
+   */
+  weather: {
+    enabled: boolean;
+    latitude: number;
+    longitude: number;
+    locationName: string;
+    baseUrl: string;
+    tempUnit: 'celsius' | 'fahrenheit';
+    windUnit: 'kmh' | 'mph' | 'ms' | 'kn';
+    precipUnit: 'mm' | 'inch';
+    timezone: string;
+    refreshMinutes: number;
+    timeoutMs: number;
+    room: string;
+    device: string;
   };
   rooms: RoomConfig[];
   projectRoot: string;
